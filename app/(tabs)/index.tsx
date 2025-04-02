@@ -1,74 +1,191 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet, View, Dimensions, Pressable } from "react-native";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { Ionicons } from "@expo/vector-icons";
+import { LineChart } from "react-native-chart-kit";
+import { useRouter } from "expo-router";
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const gasLevel = 450;
+  const isNormal = gasLevel < 1000;
+  const screenWidth = Dimensions.get("window").width;
+
+  const chartData = {
+    labels: ["8", "9", "10", "11", "12", "13", "14", "15"],
+    datasets: [
+      {
+        data: [2.1, 3.2, 2.5, 3.1, 2.8, 3.5, 4.1, 5.4],
+      },
+    ],
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <ThemedView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.titleContainer}>
+          <ThemedText type="title">Dashboard</ThemedText>
+        </View>
+        <View style={styles.headerIcons}>
+          <Ionicons name="notifications-outline" size={24} color="#3498db" />
+          <Pressable onPress={() => router.push("/settings")}>
+            <Ionicons name="settings-outline" size={24} color="#3498db" />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Gas Level Indicator */}
+      <View style={styles.gasIndicator}>
+        <View style={styles.gasLevelCircle}>
+          <ThemedText style={styles.gasLevelLabel}>Gas Level</ThemedText>
+          <ThemedText style={styles.gasLevelValue}>{gasLevel}</ThemedText>
+          <ThemedText style={styles.gasLevelUnit}>PPM</ThemedText>
+          <ThemedText
+            style={[
+              styles.gasStatus,
+              { color: isNormal ? "#3498db" : "#e74c3c" },
+            ]}
+          >
+            {isNormal ? "NORMAL" : "WARNING"}
+          </ThemedText>
+        </View>
+      </View>
+
+      {/* Alerts Section */}
+      <View style={styles.alertsSection}>
+        <ThemedText style={styles.sectionTitle}>Alerts</ThemedText>
+        <View style={styles.alertCard}>
+          <Ionicons name="warning" size={24} color="#e74c3c" />
+          <View style={styles.alertContent}>
+            <ThemedText style={styles.alertText}>Gas leak detected</ThemedText>
+            <ThemedText style={styles.alertTime}>Today, 11:30 AM</ThemedText>
+          </View>
+          <Pressable onPress={() => router.push("/alertsHistory")}>
+            <Ionicons name="chevron-forward" size={24} color="#3498db" />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Graph Section */}
+      <View style={styles.graphSection}>
+        <LineChart
+          data={chartData}
+          width={screenWidth - 65}
+          height={180}
+          chartConfig={{
+            backgroundColor: "#1e1e1e",
+            backgroundGradientFrom: "#1e1e1e",
+            backgroundGradientTo: "#1e1e1e",
+            decimalPlaces: 1,
+            color: (opacity = 1) => `rgba(52, 152, 219, ${opacity})`,
+            style: {
+              borderRadius: 16,
+            },
+          }}
+          bezier
+          style={styles.chart}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+    padding: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 30,
+    marginTop: 30,
+  },
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  headerIcons: {
+    flexDirection: "row",
+    gap: 15,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  gasIndicator: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  gasLevelCircle: {
+    width: 300,
+    height: 300,
+    borderRadius: 200,
+    backgroundColor: "#1e1e1e",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#3498db",
+  },
+  gasLevelLabel: {
+    fontSize: 24,
+    color: "#3498db",
+    marginBottom: 10,
+  },
+  gasLevelValue: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "#fff",
+    marginTop: 10,
+  },
+  gasLevelUnit: {
+    fontSize: 20,
+    color: "#666",
+    marginTop: 8,
+  },
+  gasStatus: {
+    fontSize: 18,
+    fontWeight: "500",
+    marginTop: 8,
+  },
+  alertsSection: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 15,
+  },
+  alertCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#121212",
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  alertContent: {
+    flex: 1,
+    marginLeft: 15,
+  },
+  alertText: {
+    fontSize: 16,
+    color: "#fff",
+  },
+  alertTime: {
+    fontSize: 12,
+    color: "#3498db",
+    marginTop: 4,
+  },
+  graphSection: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 12,
+    padding: 10,
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
   },
 });
